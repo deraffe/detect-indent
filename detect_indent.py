@@ -18,11 +18,14 @@ def analyze_line2(line: str) -> Tuple[Optional[str], int]:
     char = line[0]
     indent_char = char
     count = 0
+    log.debug(f'{indent_char=} {line=}')
     while char in INDENT_CHARS:
         count += 1
         char = line[count]
-    else:
+    if indent_char not in INDENT_CHARS:
+        log.debug('Analysis: no indent')
         return None, 0
+    log.debug(f'Analysis: {count} "{indent_char}"s')
     return indent_char, count
 
 
