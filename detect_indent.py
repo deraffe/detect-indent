@@ -42,14 +42,26 @@ def analyze_line1(line: str) -> Tuple[Optional[str], int]:
 
 
 def analyze_file(filename: str):
-    stats: Dict[Tuple[Optional[str], int],
-                int] = collections.defaultdict(lambda: 0)
+    stats_spaces: Dict[int, int] = collections.defaultdict(lambda: 0)
+    stats_indent_chars: Dict[Optional[str],
+                             int] = collections.defaultdict(lambda: 0)
     total = 0
     with open(filename, 'r') as fd:
         for line in fd:
-            stats[analyze_line2(line)] += 1
+            char, count = analyze_line2(line)
             total += 1
-    return total, stats
+            stats_indent_chars[char] += 1
+            if char == ' ':
+                stats_spaces[count] += 1
+    return total, stats_indent_chars, stats_spaces
+
+
+def analyze_indent(total: int, stats_indent_chars: Dict[Optional[str], int]):
+    return stats_indent_chars
+
+
+def analyze_spaces(total: int, stats_spaces: Dict[int, int]):
+    return stats_spaces
 
 
 def main():
@@ -64,7 +76,10 @@ def main():
         raise ValueError('Invalid log level: {}'.format(args.loglevel))
     logging.basicConfig(level=loglevel)
     for filename in args.file:
-        print(analyze_file(filename))
+        total, indent_chars, spaces = analyze_file(filename)
+        log.debug((total, indent_chars, spaces))
+        print(analyze_indent(total, indent_chars))
+        print(analyze_spaces(total, spaces))
 
 
 if __name__ == '__main__':
