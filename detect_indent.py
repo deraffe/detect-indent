@@ -145,7 +145,26 @@ def main():
         else:
             space_size = None
         filestats[(indent_type, dominant_type, space_size)] += 1
-    print(filestats)
+    indent_map = {
+        IndentType.SPACES: 'spaces',
+        IndentType.TABS: 'tabs',
+        IndentType.MIXED: 'mixed',
+        IndentType.NONE: 'inconclusive',
+    }
+    for combination, count in sorted(
+        filestats.items(), key=lambda item: item[1], reverse=True
+    ):
+        indent_type, dominant_type, space_size = combination
+        findent_type = indent_map[indent_type]
+        if indent_type == dominant_type:
+            fdominant_type = ''
+        else:
+            fdominant_type = indent_map[dominant_type]
+        if space_size is None:
+            fspace_size = ''
+        else:
+            fspace_size = f'{space_size}'
+        print(f'{count}:{findent_type}:{fdominant_type}:{fspace_size}')
 
 
 if __name__ == '__main__':
