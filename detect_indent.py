@@ -104,8 +104,18 @@ def analyze_indent(
     return IndentType.NONE
 
 
-def analyze_spaces(total: int, stats_spaces: Dict[int, int]):
-    return stats_spaces
+def analyze_spaces(total: int, stats_spaces: Dict[int, int]) -> Optional[int]:
+    for space_size in SPACE_INDENT_SIZES:
+        yay = 0
+        nay = 0
+        for num_spaces, occurences in stats_spaces.items():
+            if num_spaces % space_size == 0:
+                yay += occurences
+            else:
+                nay += occurences
+        if nay / yay < 0.1:
+            return space_size
+    return None
 
 
 def main():
