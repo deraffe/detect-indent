@@ -113,6 +113,8 @@ def analyze_spaces(total: int, stats_spaces: Dict[int, int]) -> int:
                 yay += occurences
             else:
                 nay += occurences
+        if yay == 0:
+            continue
         if nay / yay < 0.1:
             return space_size
     return 0
