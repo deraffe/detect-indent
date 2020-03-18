@@ -104,7 +104,7 @@ def analyze_indent(
     return IndentType.NONE
 
 
-def analyze_spaces(total: int, stats_spaces: Dict[int, int]) -> Optional[int]:
+def analyze_spaces(total: int, stats_spaces: Dict[int, int]) -> int:
     for space_size in SPACE_INDENT_SIZES:
         yay = 0
         nay = 0
@@ -115,7 +115,7 @@ def analyze_spaces(total: int, stats_spaces: Dict[int, int]) -> Optional[int]:
                 nay += occurences
         if nay / yay < 0.1:
             return space_size
-    return None
+    return 0
 
 
 def main():
@@ -129,15 +129,23 @@ def main():
     if not isinstance(loglevel, int):
         raise ValueError('Invalid log level: {}'.format(args.loglevel))
     logging.basicConfig(level=loglevel)
+    filestats: Dict[Tuple[IndentType, IndentType,
+                          Optional[int]]] = collections.defaultdict(lambda: 0)
     for filename in args.file:
+        log.info(f'{filename=}')
         total, indent_chars, spaces = analyze_file(filename)
         log.debug((total, indent_chars, spaces))
         indent_type = analyze_indent(total, indent_chars)
-        print(f'Indent Type: {indent_type}')
+        log.info(f'Indent Type: {indent_type}')
         dominant_type = analyze_dominant_indent(total, indent_chars)
-        print(f'Dominant Type: {dominant_type}')
+        log.info(f'Dominant Type: {dominant_type}')
         if indent_type in (IndentType.SPACES, IndentType.MIXED):
-            print(analyze_spaces(total, spaces))
+            space_size = analyze_spaces(total, spaces)
+            log.info(f'Space indentation size: {space_size}')
+        else:
+            space_size = None
+        filestats[(indent_type, dominant_type, space_size)] += 1
+    print(filestats)
 
 
 if __name__ == '__main__':
